@@ -1,6 +1,7 @@
 
 extern crate dotenv;
 
+use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
 use mongodb::{options::ClientOptions, Client};
 use mongodb::options::{Credential, AuthMechanism};
@@ -20,6 +21,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(Cors::default().allowed_origin("http://localhost:3000"))
             .app_data(client.clone())
             .service(web::scope("/api").configure(resort::handlers::routes))
     })

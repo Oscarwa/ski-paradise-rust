@@ -17,9 +17,10 @@ Resort
 [X] Research rust frameworks
 [X] Setup API first enpoint
 [X] Connect to DB
-[ ] Implement resort endpoints
-[ ] Implement user endpoints
-[ ] Setup frontend
-[ ] Implement Resorts screen
+[X] Implement resort endpoints
+[X] Implement user endpoints
+[X] Setup frontend
+[X] Link UI with API
+[-] Implement Resorts screen
 [ ] Implement Users screen
 [ ] Setup docker
