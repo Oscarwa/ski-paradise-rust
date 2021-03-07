@@ -15,8 +15,8 @@ Resort
  - location: string
 
 [X] Research rust frameworks
-[ ] Setup API first enpoint
-[ ] Connect to DB
+[X] Setup API first enpoint
+[X] Connect to DB
 [ ] Implement resort endpoints
 [ ] Implement user endpoints
 [ ] Setup frontend
