@@ -32,17 +32,16 @@ function App() {
             </Nav.Item>
           </Nav>
         </Navbar>
-        <Switch>
-          <Route path='/resorts'>
-            <Resorts />
-          </Route>
-          <Route path='/users'>
-
-          </Route>
-          <Route path='/'>
-            <Home />
-          </Route>
-        </Switch>
+          <Switch>
+            <Route path='/resorts'>
+              <Resorts />
+            </Route>
+            <Route path='/users'>
+            </Route>
+            <Route path='/'>
+              <Home />
+            </Route>
+          </Switch>
       </Router>
     </div>
   );

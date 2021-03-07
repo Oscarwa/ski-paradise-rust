@@ -21,7 +21,11 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .wrap(Cors::default().allowed_origin("http://localhost:3000"))
+            .wrap(Cors::default()
+                .allow_any_origin()
+                .allow_any_method()
+                .allow_any_header()
+            )
             .app_data(client.clone())
             .service(web::scope("/api").configure(resort::handlers::routes))
     })

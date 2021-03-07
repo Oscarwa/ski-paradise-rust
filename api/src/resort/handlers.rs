@@ -13,9 +13,12 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::resource("/resorts")
             .route(web::get().to(get_resorts))
-            .route(web::post().to(add_resort))
-            .route(web::delete().to(delete_resort)),
-        
+            .route(web::post().to(add_resort)),
+    )
+    .service(
+        web::resource("/resorts/{id}")
+            .route(web::delete().to(delete_resort))
+            .route(web::patch().to(update_resort))
     );
 }
 
@@ -70,17 +73,50 @@ async fn add_resort(data: web::Data<Mutex<Client>>, new_resort: web::Json<NewRes
 }
 
 async fn delete_resort(data: web::Data<Mutex<Client>>, web::Path(id): web::Path<String>) -> impl Responder {
-    println!("body: {}", id);
     let resorts_collection = data
         .lock()
         .unwrap()
         .database(MONGO_DB)
         .collection(MONGO_COLL_RESORTS);
 
-    let filter = doc! { "_id": id};
-    match resorts_collection.delete_one(filter, None).await {
-        Ok(_) => {
-            HttpResponse::Ok().json(true)
+    //let bson_id = `ObjectId { id: id }`;
+    let filter = doc! { "_id": bson::oid::ObjectId::with_string(&id.to_string()).unwrap() };
+    match resorts_collection.find_one_and_delete(filter.clone(), None).await {
+        Ok(deleted_result) => {
+            match deleted_result {
+                Some(deleted) => {
+                    let deleted_doc: Result<Resort, _> = bson::from_bson(Bson::Document(deleted));
+                    match deleted_doc {
+                        Ok(_del) => HttpResponse::Ok().json(true),
+                        Err(_) => HttpResponse::NotFound().json(false)
+                    }
+                },
+                None => {
+                    println!("{}", &filter);
+                    HttpResponse::NotFound().json(false)
+                }
+            }
+        },
+        Err(err) => {
+            println!("{}", err);
+            HttpResponse::NotFound().json(false)
+        }
+    }
+}
+
+async fn update_resort(data: web::Data<Mutex<Client>>, web::Path(id): web::Path<String>, resort: web::Json<NewResort>) -> impl Responder {
+    println!("{}", resort.name);
+    let resorts_collection = data
+        .lock()
+        .unwrap()
+        .database(MONGO_DB)
+        .collection(MONGO_COLL_RESORTS);
+
+    let update = doc! { "name": &resort.name };
+    let filter = doc! { "_id": bson::oid::ObjectId::with_string(&id.to_string()).unwrap() };
+    match resorts_collection.update_one(filter.clone(), update, None).await {
+        Ok(result) => {
+            HttpResponse::Ok().json(result.modified_count == 1)
         },
         Err(err) => {
             println!("{}", err);
