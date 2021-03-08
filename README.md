@@ -3,14 +3,14 @@
 Entities
 
 User
- - id: int
+ - id: mongo objectId
  - firstName: string
  - lastName: string
  - email: string
- - favResort: int (FK)
+ - favResort: string
 
 Resort
- - id: int
+ - id: mongo objectId
  - name: string
  - location: string
 
@@ -25,4 +25,3 @@ Resort
 [X] Implement Users screen
 [X] Implement Thank you page
 [X] Implement Reports screen
-[ ] Setup docker

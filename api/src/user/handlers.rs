@@ -35,7 +35,8 @@ async fn get_users(data: web::Data<Mutex<Client>>) -> impl Responder {
                 let resort: User = bson::from_bson(Bson::Document(document)).unwrap();
                 results.push(resort);
             }
-            _ => {
+            Err(err) => {
+                println!("get_users failed! {}", err);
                 return HttpResponse::InternalServerError().finish();
             }
         }
@@ -44,6 +45,16 @@ async fn get_users(data: web::Data<Mutex<Client>>) -> impl Responder {
 }
 
 async fn add_user(data: web::Data<Mutex<Client>>, new_user: web::Json<NewUser>) -> impl Responder {
+    if &new_user.first_name == "" {
+        return HttpResponse::BadRequest().json("First name missing")
+    }
+    if &new_user.last_name == "" {
+        return HttpResponse::BadRequest().json("Last name missing")
+    }
+    if &new_user.email == "" {
+        return HttpResponse::BadRequest().json("Email missing")
+    }
+    
     let users_collection = data
         .lock()
         .unwrap()
@@ -67,61 +78,8 @@ async fn add_user(data: web::Data<Mutex<Client>>, new_user: web::Json<NewUser>) 
         }
         Err(err) =>
         {
-            println!("Failed! {}", err);
+            println!("add_user failed! {}", err);
             return HttpResponse::InternalServerError().finish()
         }
     }
 }
-
-// async fn delete_resort(data: web::Data<Mutex<Client>>, web::Path(id): web::Path<String>) -> impl Responder {
-//     let resorts_collection = data
-//         .lock()
-//         .unwrap()
-//         .database(MONGO_DB)
-//         .collection(MONGO_COLL_RESORTS);
-
-//     //let bson_id = `ObjectId { id: id }`;
-//     let filter = doc! { "_id": bson::oid::ObjectId::with_string(&id.to_string()).unwrap() };
-//     match resorts_collection.find_one_and_delete(filter.clone(), None).await {
-//         Ok(deleted_result) => {
-//             match deleted_result {
-//                 Some(deleted) => {
-//                     let deleted_doc: Result<Resort, _> = bson::from_bson(Bson::Document(deleted));
-//                     match deleted_doc {
-//                         Ok(_del) => HttpResponse::Ok().json(true),
-//                         Err(_) => HttpResponse::NotFound().json(false)
-//                     }
-//                 },
-//                 None => {
-//                     println!("{}", &filter);
-//                     HttpResponse::NotFound().json(false)
-//                 }
-//             }
-//         },
-//         Err(err) => {
-//             println!("{}", err);
-//             HttpResponse::NotFound().json(false)
-//         }
-//     }
-// }
-
-// async fn update_resort(data: web::Data<Mutex<Client>>, web::Path(id): web::Path<String>, resort: web::Json<NewResort>) -> impl Responder {
-//     println!("{}", resort.name);
-//     let resorts_collection = data
-//         .lock()
-//         .unwrap()
-//         .database(MONGO_DB)
-//         .collection(MONGO_COLL_RESORTS);
-
-//     let update = doc! { "name": &resort.name };
-//     let filter = doc! { "_id": bson::oid::ObjectId::with_string(&id.to_string()).unwrap() };
-//     match resorts_collection.update_one(filter.clone(), update, None).await {
-//         Ok(result) => {
-//             HttpResponse::Ok().json(result.modified_count == 1)
-//         },
-//         Err(err) => {
-//             println!("{}", err);
-//             HttpResponse::NotFound().json(false)
-//         }
-//     }
-// }

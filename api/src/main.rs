@@ -14,10 +14,18 @@ use api::user;
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
-    // let uri = dotenv::var("MONGODB_URI");
-    let mut client_options = ClientOptions::parse("mongodb+srv://ski-user:VBOHlj82dcUVQzJp@cluster0.xex8j.mongodb.net/myFirstDatabase?retryWrites=true&w=majority").await.unwrap();
-    client_options.app_name = Some("ski-api".to_string());
-    client_options.credential = Some(Credential::builder().username("admin".to_string()).password("admin".to_string()).mechanism(AuthMechanism::ScramSha1).build());
+    let uri = dotenv::var("MONGODB_URI").expect("MONGODB_URI not configured!");
+    let mut client_options = ClientOptions::parse(&uri).await.unwrap();
+
+    let user = dotenv::var("MONGODB_USER").expect("MONGODB_USER not configured!");
+    let pwd = dotenv::var("MONGODB_PWD").expect("MONGODB_PWD not configured!");
+    client_options.credential = Some(Credential::builder()
+        .username(user)
+        .password(pwd)
+        .mechanism(AuthMechanism::ScramSha1)
+        .build()
+    );
+
     let client = web::Data::new(Mutex::new(Client::with_options(client_options).unwrap()));
 
     HttpServer::new(move || {

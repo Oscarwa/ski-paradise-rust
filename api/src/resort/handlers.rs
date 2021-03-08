@@ -49,6 +49,10 @@ async fn get_resorts(data: web::Data<Mutex<Client>>) -> impl Responder {
 }
 
 async fn add_resort(data: web::Data<Mutex<Client>>, new_resort: web::Json<NewResort>) -> impl Responder {
+    if &new_resort.name == "" {
+        return HttpResponse::BadRequest().json("Resort name missing")
+    }
+
     let resort_collection = data
         .lock()
         .unwrap()
@@ -66,7 +70,7 @@ async fn add_resort(data: web::Data<Mutex<Client>>, new_resort: web::Json<NewRes
         }
         Err(err) =>
         {
-            println!("Failed! {}", err);
+            println!("add_resort failed! {}", err);
             return HttpResponse::InternalServerError().finish()
         }
     }
@@ -79,7 +83,6 @@ async fn delete_resort(data: web::Data<Mutex<Client>>, web::Path(id): web::Path<
         .database(MONGO_DB)
         .collection(MONGO_COLL_RESORTS);
 
-    //let bson_id = `ObjectId { id: id }`;
     let filter = doc! { "_id": bson::oid::ObjectId::with_string(&id.to_string()).unwrap() };
     match resorts_collection.find_one_and_delete(filter.clone(), None).await {
         Ok(deleted_result) => {
@@ -92,20 +95,22 @@ async fn delete_resort(data: web::Data<Mutex<Client>>, web::Path(id): web::Path<
                     }
                 },
                 None => {
-                    println!("{}", &filter);
                     HttpResponse::NotFound().json(false)
                 }
             }
         },
         Err(err) => {
-            println!("{}", err);
+            println!("delete_resort failed! {}", err);
             HttpResponse::NotFound().json(false)
         }
     }
 }
 
 async fn update_resort(data: web::Data<Mutex<Client>>, web::Path(id): web::Path<String>, resort: web::Json<NewResort>) -> impl Responder {
-    println!("{}", resort.name);
+    if &resort.name == "" {
+        return HttpResponse::BadRequest().json("Resort name missing")
+    }
+
     let resorts_collection = data
         .lock()
         .unwrap()
@@ -119,7 +124,7 @@ async fn update_resort(data: web::Data<Mutex<Client>>, web::Path(id): web::Path<
             HttpResponse::Ok().json(result.modified_count == 1)
         },
         Err(err) => {
-            println!("{}", err);
+            println!("update_resort failed! {}", err);
             HttpResponse::NotFound().json(false)
         }
     }
