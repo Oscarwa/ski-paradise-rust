@@ -13,6 +13,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Resorts from "./Views/Resorts";
 import Home from "./Views/Home";
+import UserRegistration from "./Views/UserRegistration";
+import ThankYou from "./Views/ThankYou";
+import Report from "./Views/Report";
 
 function App() {
   return (
@@ -28,7 +31,7 @@ function App() {
               <Nav.Link as={Link} to="/resorts">Resorts</Nav.Link>
             </Nav.Item>
             <Nav.Item>
-              <Nav.Link as={Link} to="/users">Users</Nav.Link>
+              <Nav.Link as={Link} to="/report">Report</Nav.Link>
             </Nav.Item>
           </Nav>
         </Navbar>
@@ -37,6 +40,13 @@ function App() {
               <Resorts />
             </Route>
             <Route path='/users'>
+              <UserRegistration />
+            </Route>
+            <Route path='/report'>
+              <Report />
+            </Route>
+            <Route path='/thank-you'>
+              <ThankYou />
             </Route>
             <Route path='/'>
               <Home />

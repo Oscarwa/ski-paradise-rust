@@ -21,6 +21,8 @@ Resort
 [X] Implement user endpoints
 [X] Setup frontend
 [X] Link UI with API
-[-] Implement Resorts screen
-[ ] Implement Users screen
+[X] Implement Resorts screen
+[X] Implement Users screen
+[X] Implement Thank you page
+[X] Implement Reports screen
 [ ] Setup docker

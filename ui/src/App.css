@@ -4,6 +4,9 @@
   margin: 0 auto;
   width: 800px;
 }
+.center {
+  text-align: center;
+}
 .actions {
   text-align: right;
   margin: 1rem 0;

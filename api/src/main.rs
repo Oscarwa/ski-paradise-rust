@@ -8,6 +8,7 @@ use mongodb::options::{Credential, AuthMechanism};
 use std::sync::*;
 use dotenv::dotenv;
 use api::resort;
+use api::user;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -27,7 +28,11 @@ async fn main() -> std::io::Result<()> {
                 .allow_any_header()
             )
             .app_data(client.clone())
-            .service(web::scope("/api").configure(resort::handlers::routes))
+            .service(
+                web::scope("/api")
+                    .configure(resort::handlers::routes)
+                    .configure(user::handlers::routes)
+            )
     })
     .bind("127.0.0.1:8080")?
     .run()

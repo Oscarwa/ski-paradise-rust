@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Col, Form, Row, Table } from "react-bootstrap";
 import SkiModal from "../../Components/SkiModal";
+import { apiCall } from "../../Utils/api";
 
 export default function Resorts() {
   const [resorts, setResorts] = useState([]);
@@ -9,18 +10,10 @@ export default function Resorts() {
   const [name, setName] = useState("");
   const [selected, setSelected] = useState();
   const [actions, setActions] = useState([]);
-  const baseUrl = "http://localhost:8080/api/resorts";
 
   const loadResorts = async () => {
-    const data = await callApi(baseUrl);
+    const data = await apiCall('/resorts');
     setResorts(data);
-  };
-
-  const callApi = async (url, options) => {
-    const result = await fetch(url, options);
-    const data = await result.json();
-    console.log(data);
-    return data;
   };
 
   useEffect(() => {
@@ -28,47 +21,43 @@ export default function Resorts() {
   }, []);
 
   const edit = async () => {
-    const res = await callApi(`${baseUrl}/${selected._id["$oid"]}`, {
-        method: "PATCH",
-        body: JSON.stringify({ name }),
-        headers: {
-            'Content-Type': 'application/json',
+    const res = await apiCall(`/resorts/${selected._id["$oid"]}`, {
+      method: "PATCH",
+      body: JSON.stringify({ name }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (res) {
+      const updatedResort = resorts.map((r) => {
+        if (r._id["$oid"] === selected._id["$oid"]) {
+          r.name = name;
         }
+        return r;
       });
-      if (res) {
-        console.log("updated", selected);
-        const updatedResort = resorts.map(r => {
-              if(r._id["$oid"] === selected._id["$oid"])
-              {
-                  r.name = name;
-              }
-              return r;
-          }
-        );
-        setResorts(updatedResort);
-        cancel();
-      }
-      setSelected(null);
-  }
+      setResorts(updatedResort);
+      cancel();
+    }
+    setSelected(null);
+  };
 
   const cancel = () => {
-      setSelected(null);
-      setEditMode(false);
-      setName('');
-  }
+    setSelected(null);
+    setEditMode(false);
+    setName("");
+  };
 
   const add = async () => {
     if (name) {
-      const res = await callApi(baseUrl, {
+      const res = await apiCall('/resorts', {
         method: "POST",
         body: JSON.stringify({ name }),
         headers: {
-            'Content-Type': 'application/json',
-        }
+          "Content-Type": "application/json",
+        },
       });
       if (res) {
-        console.log("Added");
-        const _resorts = [{_id: res, name}, ...resorts];
+        const _resorts = [{ _id: res, name }, ...resorts];
         setResorts(_resorts);
         cancel();
       }
@@ -87,7 +76,6 @@ export default function Resorts() {
     const actions = [
       {
         handler: () => {
-          console.log("canceled remove");
           setDeleteModalShow(false);
           cancel();
         },
@@ -96,11 +84,10 @@ export default function Resorts() {
       },
       {
         handler: () => {
-          const res = callApi(`${baseUrl}/${resort._id["$oid"]}`, {
+          const res = apiCall(`/resorts/${resort._id["$oid"]}`, {
             method: "DELETE",
           });
           if (res) {
-            console.log("removed", resort);
             const newResorts = resorts.filter(
               (r) => r._id["$oid"] !== resort._id["$oid"]
             );
@@ -118,9 +105,10 @@ export default function Resorts() {
 
   return (
     <div>
-      <h1>Resorts</h1>
       <hr />
       <section className="container">
+      <h1>Resorts</h1>
+      <hr />
         <div className="actions">
           <Row>
             <Col sm={7}>
@@ -136,11 +124,16 @@ export default function Resorts() {
               />
             </Col>
             <Col>
-              { !editMode
-                ? <Button onClick={add}>Add</Button>
-                : <Button variant='success' onClick={edit}>Update</Button>
-              }
-              <Button variant='secondary' onClick={cancel}>Cancel</Button>
+              {!editMode ? (
+                <Button onClick={add}>Add</Button>
+              ) : (
+                <Button variant="success" onClick={edit}>
+                  Update
+                </Button>
+              )}
+              <Button variant="secondary" onClick={cancel}>
+                Cancel
+              </Button>
             </Col>
           </Row>
         </div>
@@ -156,7 +149,7 @@ export default function Resorts() {
             {resorts.map((r) => {
               return (
                 <tr key={r._id["$oid"]}>
-                  <td>{r.name}</td>
+                  <td width="70%">{r.name}</td>
                   <td className="actions">
                     <Button onClick={() => startEdit(r)} variant="dark">
                       Edit
@@ -171,7 +164,7 @@ export default function Resorts() {
           </tbody>
         </Table>
       </section>
-      
+
       <SkiModal
         show={deleteModalShow}
         title={"Delete resort"}
