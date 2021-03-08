@@ -14,6 +14,10 @@ ui folder contains the front-end application, it is based on create-react-app an
 3. Execute `npm start`
 4. Development server will start on port 3000
 
+### DB
+I am using MongoDB hosted on MongoDB Atlas so there is no need to configure anything locally.
+Hosted db should allow connections and connectionString / credentials are included into the code (it's ok I know the risks :D)
+
 ## Entities
 
 User
